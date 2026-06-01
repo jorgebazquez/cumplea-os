@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorpresa para Itzel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #fce4ec;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Pantalla de Conteo */
+        #countdown {
+            font-size: 8rem;
+            color: #d81b60;
+            font-weight: bold;
+        }
+
+        /* Pantalla de la Carta y Confeti */
+        #card-container {
+            position: relative;
+            z-index: 10;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        #card-container:hover {
+            transform: scale(1.05);
+        }
+        .card {
+            width: 200px;
+            height: 150px;
+            background-color: #ff4081;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #fff;
+        }
+
+        .confetti {
+            position: absolute;
+            font-size: 2rem;
+            animation: fall linear forwards;
+            z-index: 1;
+        }
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+            }
+        }
+
+        /* Pantalla de la Hoja de Papel */
+        #paper-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        #date-header {
+            font-size: 2rem;
+            color: #880e4f;
+            margin-top: 20px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .paper {
+            background-color: #fffdf5;
+            width: 90%;
+            max-width: 600px;
+            height: 70vh;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border-radius: 5px;
+            padding: 40px;
+            box-sizing: border-box;
+            font-family: 'Caveat', cursive;
+            font-size: 2.5rem;
+            color: #333;
+            position: relative;
+            overflow: hidden;
+            transition: transform 1s ease, opacity 1s ease;
+        }
+
+        #typewriter-text {
+            white-space: pre-wrap;
+            display: inline;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 3px;
+            background-color: #333;
+            animation: blink 0.7s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        #paper-image {
+            display: block;
+            margin: 20px auto;
+            max-width: 80%;
+            max-height: 250px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        /* Animación del borrador/lápiz */
+        #pencil {
+            position: absolute;
+            font-size: 4rem;
+            right: -100px;
+            bottom: 20px;
+            z-index: 20;
+            transition: all 2s ease-in-out;
+            opacity: 0;
+        }
+        
+        .erasing #pencil {
+            opacity: 1;
+            right: 110%; /* Cruza toda la hoja */
+        }
+        .erased-content {
+            opacity: 0 !important;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="countdown">5</div>
+
+    <div id="card-container" class="hidden">
+        <div class="card">Abre tu carta 💌</div>
+    </div>
+
+    <div id="paper-screen" class="hidden">
+        <div id="date-header">01 de junio del 2001</div>
+        <div class="paper" id="paper">
+            <div id="content-to-erase">
+                <span id="typewriter-text"></span><span class="cursor" id="cursor">|</span>
+                <img src="imagen1.jpg" id="paper-image" alt="Princesa">
+            </div>
+            <div id="pencil">✏️</div>
+        </div>
+    </div>
+
+    <script>
+        // Variables de elementos
+        const countdownEl = document.getElementById('countdown');
+        const cardContainer = document.getElementById('card-container');
+        const paperScreen = document.getElementById('paper-screen');
+        const dateHeader = document.getElementById('date-header');
+        const typewriterText = document.getElementById('typewriter-text');
+        const paperImage = document.getElementById('paper-image');
+        const paper = document.getElementById('paper');
+        const contentToErase = document.getElementById('content-to-erase');
+        const cursor = document.getElementById('cursor');
+
+        // Texto a escribir
+        const textToType = "Hola Itzel\nun día como hoy nació una princesa tan linda";
+        let typingIndex = 0;
+
+        // 1. Lógica del Conteo Regresivo
+        let count = 5;
+        const countInterval = setInterval(() => {
+            count--;
+            if (count > 0) {
+                countdownEl.innerText = count;
+            } else if (count === 0) {
+                countdownEl.innerText = "0";
+            } else {
+                clearInterval(countInterval);
+                countdownEl.classList.add('hidden');
+                showCard();
+            }
+        }, 1000);
+
+        // 2. Mostrar carta y lanzar emojis de confeti
+        let confettiInterval;
+        function showCard() {
+            cardContainer.classList.remove('hidden');
+            confettiInterval = setInterval(createConfetti, 300);
+        }
+
+        function createConfetti() {
+            const emojis = ['🎉', '🎊', '✨', '💖', '🌸'];
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            confetti.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.animationDuration = Math.random() * 2 + 3 + 's'; // 3s a 5s
+            document.body.appendChild(confetti);
+
+            setTimeout(() => {
+                confetti.remove();
+            }, 5000);
+        }
+
+        // 3. Evento al hacer clic en la carta
+        cardContainer.addEventListener('click', () => {
+            clearInterval(confettiInterval);
+            // Limpiar confetis existentes
+            document.querySelectorAll('.confetti').forEach(e => e.remove());
+            
+            cardContainer.classList.add('hidden');
+            paperScreen.classList.remove('hidden');
+            
+            // Mostrar fecha
+            setTimeout(() => {
+                dateHeader.style.opacity = 1;
+            }, 500);
+
+            // Iniciar efecto de máquina de escribir
+            setTimeout(typeWriter, 1500);
+        });
+
+        // 4. Efecto de escribir en la hoja
+        function typeWriter() {
+            if (typingIndex < textToType.length) {
+                typewriterText.textContent += textToType.charAt(typingIndex);
+                typingIndex++;
+                setTimeout(typeWriter, 100); // Velocidad de escritura
+            } else {
+                // Mostrar imagen centrada cuando termine de escribir
+                cursor.style.display = 'none';
+                paperImage.style.opacity = 1;
+
+                // 5. Esperar 15 segundos y borrar
+                setTimeout(eraseAndChangePaper, 15000);
+            }
+        }
+
+        // 5. Animación del lápiz borrando y cambio de hoja
+        function eraseAndChangePaper() {
+            // Animar el lápiz
+            paper.classList.add('erasing');
+            
+            // Desvanecer el texto y la imagen
+            contentToErase.classList.add('erased-content');
+
+            setTimeout(() => {
+                // Quitar la animación del lápiz
+                paper.classList.remove('erasing');
+                
+                // Efecto de cambiar de hoja (deslizar o reiniciar)
+                paper.style.transform = 'translateX(-150%)'; // La hoja vieja se va
+                
+                setTimeout(() => {
+                    // Limpiar contenido
+                    typewriterText.textContent = '';
+                    paperImage.style.opacity = 0;
+                    contentToErase.classList.remove('erased-content');
+                    
+                    // Entra la nueva hoja
+                    paper.style.transform = 'translateX(0)';
+                    
+                    // AQUÍ COMIENZA LA CONTINUACIÓN ("posterior a eso")
+                    iniciarSiguienteFase();
+
+                }, 1000);
+
+            }, 2000); // Tiempo que tarda el lápiz en cruzar
+        }
+
+        // Función lista para el contenido que sigue
+        function iniciarSiguienteFase() {
+            // Aquí puedes agregar la lógica para lo que sigue en la nueva hoja
+            console.log("Hoja nueva en blanco lista para la siguiente fase.");
+        }
+    </script>
+</body>
+</html>
