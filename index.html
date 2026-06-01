@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sorpresa para Itzel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
@@ -14,31 +14,28 @@
             align-items: center;
             height: 100vh;
             background-color: #fce4ec;
+            transition: background-color 2s ease;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
             flex-direction: column;
         }
 
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
 
-        /* Pantalla de Conteo */
+        /* Conteo Regresivo */
         #countdown {
             font-size: 8rem;
-            color: #d81b60;
+            color: #fff;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
             font-weight: bold;
         }
 
-        /* Pantalla de la Carta y Confeti */
+        /* Carta inicial */
         #card-container {
             position: relative;
             z-index: 10;
             cursor: pointer;
             transition: transform 0.3s ease;
-        }
-        #card-container:hover {
-            transform: scale(1.05);
         }
         .card {
             width: 200px;
@@ -52,23 +49,21 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
             font-size: 1.5rem;
             font-weight: bold;
-            text-align: center;
             border: 2px solid #fff;
         }
 
+        /* Confeti */
         .confetti {
             position: absolute;
             font-size: 2rem;
             animation: fall linear forwards;
-            z-index: 1;
+            z-index: 100;
         }
         @keyframes fall {
-            to {
-                transform: translateY(100vh) rotate(720deg);
-            }
+            to { transform: translateY(110vh) rotate(720deg); }
         }
 
-        /* Pantalla de la Hoja de Papel */
+        /* Escena del Papel */
         #paper-screen {
             display: flex;
             flex-direction: column;
@@ -80,7 +75,8 @@
         
         #date-header {
             font-size: 2rem;
-            color: #880e4f;
+            color: #fff;
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
             margin-top: 20px;
             font-weight: bold;
             opacity: 0;
@@ -91,66 +87,86 @@
             background-color: #fffdf5;
             width: 90%;
             max-width: 600px;
-            height: 70vh;
+            height: 75vh;
             margin-top: 20px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             border-radius: 5px;
             padding: 40px;
             box-sizing: border-box;
             font-family: 'Caveat', cursive;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             color: #333;
             position: relative;
             overflow: hidden;
-            transition: transform 1s ease, opacity 1s ease;
+            transition: all 1.5s ease-in-out;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
         }
 
-        #typewriter-text {
-            white-space: pre-wrap;
-            display: inline;
+        /* Animación de cierre de carta */
+        .paper.closed {
+            transform: scale(0) rotateY(90deg);
+            opacity: 0;
         }
 
-        .cursor {
-            display: inline-block;
-            width: 3px;
-            background-color: #333;
-            animation: blink 0.7s infinite;
+        #content-to-erase {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
+
+        #text-container { text-align: center; min-height: 100px; width: 100%; }
 
         #paper-image {
             display: block;
-            margin: 20px auto;
+            margin-top: 20px;
             max-width: 80%;
-            max-height: 250px;
+            max-height: 35vh;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             opacity: 0;
             transition: opacity 1s ease;
+            object-fit: contain;
         }
 
-        /* Animación del borrador/lápiz */
+        /* Lápiz borrador */
         #pencil {
             position: absolute;
             font-size: 4rem;
             right: -100px;
             bottom: 20px;
-            z-index: 20;
             transition: all 2s ease-in-out;
             opacity: 0;
         }
-        
-        .erasing #pencil {
-            opacity: 1;
-            right: 110%; /* Cruza toda la hoja */
-        }
-        .erased-content {
-            opacity: 0 !important;
-            transition: opacity 1.5s ease-in-out;
+        .erasing #pencil { opacity: 1; right: 110%; }
+        .erased-content { opacity: 0 !important; transition: opacity 1.5s ease-in-out; }
+
+        /* Mensajes Finales de Pantalla Completa */
+        #final-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            box-sizing: border-box;
+            z-index: 200;
+            opacity: 0;
+            transition: opacity 2s ease;
+            font-family: 'Dancing Script', cursive;
+            color: white;
         }
 
+        #final-text { font-size: 4rem; text-shadow: 0 0 20px rgba(0,0,0,0.5); transition: color 1s ease; }
+        #code-text { font-size: 2.5rem; font-family: 'Arial', sans-serif; line-height: 1.5; }
+
+        .cursor { display: inline-block; width: 3px; background-color: #333; animation: blink 0.7s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
@@ -165,15 +181,32 @@
         <div id="date-header">01 de junio del 2001</div>
         <div class="paper" id="paper">
             <div id="content-to-erase">
-                <span id="typewriter-text"></span><span class="cursor" id="cursor">|</span>
-                <img src="imagen1.jpg" id="paper-image" alt="Princesa">
+                <div id="text-container">
+                    <span id="typewriter-text"></span><span class="cursor" id="cursor">|</span>
+                </div>
+                <img src="" id="paper-image" alt="Sorpresa">
             </div>
             <div id="pencil">✏️</div>
         </div>
     </div>
 
+    <div id="final-overlay" class="hidden">
+        <div id="final-content">
+            <h1 id="final-text"></h1>
+            <p id="code-text"></p>
+        </div>
+    </div>
+
     <script>
-        // Variables de elementos
+        const scenes = [
+            { text: "Hola Itzel\nun día como hoy nació una princesa tan linda", image: "imagen1.jpg", bgColor: "#fce4ec", duration: 15000 },
+            { text: "¿sabes que es lo más bonito?\nque me dejaste estar contigo💕\nque hoy es un día especial\nhoy cumples 25", image: "25.png", bgColor: "#d32f2f", duration: 8000 },
+            { text: "quiero que sea un año lleno de amor", image: "flores.jpg", bgColor: "#9e9e9e", duration: 3000 },
+            { text: "💕te propongo algo💕\ndéjame amarte toda la vida", image: "sonrisa.jpg", bgColor: "#ff9800", duration: 6000 },
+            { text: "me dejas festejarte todos tus cumpleaños con amor de aquí en adelante", image: "vila.jpg", bgColor: "#ff9800", duration: 8000, confetti: true },
+            { text: "que todos los días tengas salud\nque si te falta algo dime yo te complaceré", image: "formal.jpg", bgColor: "#d32f2f", duration: 8000 }
+        ];
+
         const countdownEl = document.getElementById('countdown');
         const cardContainer = document.getElementById('card-container');
         const paperScreen = document.getElementById('paper-screen');
@@ -183,117 +216,143 @@
         const paper = document.getElementById('paper');
         const contentToErase = document.getElementById('content-to-erase');
         const cursor = document.getElementById('cursor');
+        const finalOverlay = document.getElementById('final-overlay');
+        const finalText = document.getElementById('final-text');
+        const codeText = document.getElementById('code-text');
 
-        // Texto a escribir
-        const textToType = "Hola Itzel\nun día como hoy nació una princesa tan linda";
+        let currentSceneIndex = 0;
         let typingIndex = 0;
+        let textToType = "";
+        let globalConfettiInterval = null;
 
-        // 1. Lógica del Conteo Regresivo
+        // 1. Conteo
         let count = 5;
         const countInterval = setInterval(() => {
             count--;
-            if (count > 0) {
-                countdownEl.innerText = count;
-            } else if (count === 0) {
-                countdownEl.innerText = "0";
-            } else {
+            if (count >= 0) countdownEl.innerText = count;
+            else {
                 clearInterval(countInterval);
                 countdownEl.classList.add('hidden');
                 showCard();
             }
         }, 1000);
 
-        // 2. Mostrar carta y lanzar emojis de confeti
-        let confettiInterval;
         function showCard() {
             cardContainer.classList.remove('hidden');
-            confettiInterval = setInterval(createConfetti, 300);
+            setInterval(createConfetti, 300);
         }
 
-        function createConfetti() {
-            const emojis = ['🎉', '🎊', '✨', '💖', '🌸'];
-            const confetti = document.createElement('div');
-            confetti.classList.add('confetti');
-            confetti.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-            confetti.style.left = Math.random() * 100 + 'vw';
-            confetti.style.animationDuration = Math.random() * 2 + 3 + 's'; // 3s a 5s
-            document.body.appendChild(confetti);
-
-            setTimeout(() => {
-                confetti.remove();
-            }, 5000);
-        }
-
-        // 3. Evento al hacer clic en la carta
         cardContainer.addEventListener('click', () => {
-            clearInterval(confettiInterval);
-            // Limpiar confetis existentes
             document.querySelectorAll('.confetti').forEach(e => e.remove());
-            
             cardContainer.classList.add('hidden');
             paperScreen.classList.remove('hidden');
-            
-            // Mostrar fecha
-            setTimeout(() => {
-                dateHeader.style.opacity = 1;
-            }, 500);
-
-            // Iniciar efecto de máquina de escribir
-            setTimeout(typeWriter, 1500);
+            setTimeout(() => dateHeader.style.opacity = 1, 500);
+            playNextScene();
         });
 
-        // 4. Efecto de escribir en la hoja
+        function playNextScene() {
+            const scene = scenes[currentSceneIndex];
+            document.body.style.backgroundColor = scene.bgColor;
+            paper.style.transform = 'translateX(0)';
+            typewriterText.textContent = '';
+            paperImage.src = scene.image;
+            paperImage.style.opacity = 0;
+            contentToErase.classList.remove('erased-content');
+            cursor.style.display = 'inline-block';
+            textToType = scene.text;
+            typingIndex = 0;
+            setTimeout(typeWriter, 1000);
+        }
+
         function typeWriter() {
             if (typingIndex < textToType.length) {
                 typewriterText.textContent += textToType.charAt(typingIndex);
                 typingIndex++;
-                setTimeout(typeWriter, 100); // Velocidad de escritura
+                setTimeout(typeWriter, 80);
             } else {
-                // Mostrar imagen centrada cuando termine de escribir
                 cursor.style.display = 'none';
                 paperImage.style.opacity = 1;
-
-                // 5. Esperar 15 segundos y borrar
-                setTimeout(eraseAndChangePaper, 15000);
+                if (scenes[currentSceneIndex].confetti) globalConfettiInterval = setInterval(createConfetti, 200);
+                setTimeout(eraseAndChangePaper, scenes[currentSceneIndex].duration);
             }
         }
 
-        // 5. Animación del lápiz borrando y cambio de hoja
         function eraseAndChangePaper() {
-            // Animar el lápiz
             paper.classList.add('erasing');
-            
-            // Desvanecer el texto y la imagen
             contentToErase.classList.add('erased-content');
 
             setTimeout(() => {
-                // Quitar la animación del lápiz
                 paper.classList.remove('erasing');
                 
-                // Efecto de cambiar de hoja (deslizar o reiniciar)
-                paper.style.transform = 'translateX(-150%)'; // La hoja vieja se va
-                
-                setTimeout(() => {
-                    // Limpiar contenido
-                    typewriterText.textContent = '';
-                    paperImage.style.opacity = 0;
-                    contentToErase.classList.remove('erased-content');
-                    
-                    // Entra la nueva hoja
-                    paper.style.transform = 'translateX(0)';
-                    
-                    // AQUÍ COMIENZA LA CONTINUACIÓN ("posterior a eso")
-                    iniciarSiguienteFase();
-
-                }, 1000);
-
-            }, 2000); // Tiempo que tarda el lápiz en cruzar
+                // Si terminaron las escenas de papel
+                if (currentSceneIndex === scenes.length - 1) {
+                    closeCardAndFinish();
+                } else {
+                    paper.style.transform = 'translateX(-150%)'; 
+                    setTimeout(() => {
+                        if(globalConfettiInterval) { clearInterval(globalConfettiInterval); globalConfettiInterval = null; }
+                        currentSceneIndex++;
+                        playNextScene();
+                    }, 1000);
+                }
+            }, 2000);
         }
 
-        // Función lista para el contenido que sigue
-        function iniciarSiguienteFase() {
-            // Aquí puedes agregar la lógica para lo que sigue en la nueva hoja
-            console.log("Hoja nueva en blanco lista para la siguiente fase.");
+        function closeCardAndFinish() {
+            // Animación de cerrar carta
+            paper.classList.add('closed');
+            dateHeader.style.opacity = 0;
+            
+            setTimeout(() => {
+                paperScreen.classList.add('hidden');
+                showFinalMessages();
+            }, 1500);
+        }
+
+        function showFinalMessages() {
+            // Fase: Texto en toda la página (Fondo actual Rojo)
+            finalOverlay.classList.remove('hidden');
+            setTimeout(() => finalOverlay.style.opacity = 1, 100);
+            finalText.innerText = "este año te deseo salud paz y amor";
+            finalText.style.color = "white"; // Color del texto
+
+            // Fase: Fondo Negro y Código
+            setTimeout(() => {
+                finalOverlay.style.opacity = 0;
+                setTimeout(() => {
+                    document.body.style.backgroundColor = "black";
+                    finalText.innerText = "";
+                    codeText.innerText = "al canjear este código recibirás una sorpresa especial\nJ&EJPTLVPSI🧑🏻‍🤝‍👩🏻";
+                    finalOverlay.style.opacity = 1;
+
+                    // Fase Final: Todo Blanco y "felices 25"
+                    setTimeout(() => {
+                        finalOverlay.style.opacity = 0;
+                        setTimeout(() => {
+                            document.body.style.backgroundColor = "white";
+                            codeText.innerText = "";
+                            finalText.innerText = "felices 25";
+                            // Se cambia el color para que se vea sobre el fondo blanco, y se quita la sombra blanca
+                            finalText.style.color = "#880e4f"; 
+                            finalText.style.textShadow = "none";
+                            
+                            finalOverlay.style.opacity = 1;
+                        }, 2000);
+                    }, 8000); // Tiempo para leer el código
+
+                }, 2000);
+            }, 5000); // Tiempo para leer el deseo
+        }
+
+        function createConfetti() {
+            const emojis = ['🎉', '🎊', '✨', '💖', '🌸', '🎈'];
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            confetti.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.animationDuration = Math.random() * 2 + 3 + 's';
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 5000);
         }
     </script>
 </body>
